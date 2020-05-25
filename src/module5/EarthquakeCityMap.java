@@ -149,7 +149,8 @@ public class EarthquakeCityMap extends PApplet {
 		for(Marker m : markers) {
 			if(m.isInside(map, this.mouseX, this.mouseY) && lastSelected == null) {
 				//Haoyun: this extra condition is to resolve the issue 				
-				//that titles don't disappear when quick switching from city to earthquakes 
+				//that titles don't disappear when quick switching from city to earthquakes. 
+				//This issue happens in the area where cities and earthquakes are so dense.
 				lastSelected = (CommonMarker) m;
 				lastSelected.setSelected(true);
 				break;
