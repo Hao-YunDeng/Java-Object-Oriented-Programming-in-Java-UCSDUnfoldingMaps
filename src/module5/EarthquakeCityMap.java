@@ -1,5 +1,7 @@
 package module5;
 
+import de.fhpotsdam.unfolding.providers.Microsoft;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,7 +72,8 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			//map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.HybridProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -146,12 +149,12 @@ public class EarthquakeCityMap extends PApplet {
 	private void selectMarkerIfHover(List<Marker> markers)
 	{
 		// TODO: Implement this method
-		for(Marker m : markers) {
-			if(m.isInside(map, this.mouseX, this.mouseY) && lastSelected == null) {
+		for(Marker marker : markers) {
+			if(marker.isInside(map, this.mouseX, this.mouseY) && lastSelected == null) {
 				//Haoyun: this extra condition is to resolve the issue 				
 				//that titles don't disappear when quick switching from city to earthquakes. 
 				//This issue happens in the area where cities and earthquakes are so dense.
-				lastSelected = (CommonMarker) m;
+				lastSelected = (CommonMarker) marker;
 				lastSelected.setSelected(true);
 				break;
 			}
@@ -169,8 +172,64 @@ public class EarthquakeCityMap extends PApplet {
 		// TODO: Implement this method
 		// Hint: You probably want a helper method or two to keep this code
 		// from getting too long/disorganized
+		unhideMarkers();
+		//Haoyun: if there was a previous mark clicked, clear that click 
+		//and set the click states of all markers to be false, and do no more;		
+		//if the precious click is null, check if any marker selected by this click,
+		//if so, do the job, and record this click
+		if (lastClicked != null) {
+			lastClicked.setClicked(false);
+			lastClicked = null;
+			for(Marker citymarker : cityMarkers) {
+				((CommonMarker)citymarker).setClicked(false);
+			}
+			for(Marker quakemarker : quakeMarkers) {
+				((CommonMarker)quakemarker).setClicked(false);
+			}
+		}
+		else{
+			selectIfAffected();
+		}
 	}
 	
+	public void selectIfAffected() {
+		for(Marker citymarker : cityMarkers) {			
+			if(citymarker.isSelected()) {
+				for(Marker citymarker1 : cityMarkers) {
+					if(! citymarker1.isSelected()) {
+						citymarker1.setHidden(true);
+					}								
+				}				
+				lastClicked = (CommonMarker)citymarker;				
+				for(Marker quakemarker : quakeMarkers) {
+					double distance = quakemarker.getDistanceTo(citymarker.getLocation());
+					if(distance >= ((EarthquakeMarker)quakemarker).threatCircle()) {
+						quakemarker.setHidden(true);																		
+					}
+				}
+				break;
+			}
+		}
+		
+		for(Marker quakemarker : quakeMarkers) {			
+			if(quakemarker.isSelected()) {
+				for(Marker quakemarker1 : quakeMarkers) {
+					if(! quakemarker1.isSelected()) {
+						quakemarker1.setHidden(true);
+					}								
+				}				
+				lastClicked = (CommonMarker)quakemarker;				
+				for(Marker citymarker : cityMarkers) {
+					double distance = citymarker.getDistanceTo(quakemarker.getLocation());
+					if(distance >= ((EarthquakeMarker)quakemarker).threatCircle()) {
+						citymarker.setHidden(true);																		
+					}
+				}
+				break;
+			}
+		}
+		
+	}
 	
 	// loop over and unhide all markers
 	private void unhideMarkers() {
