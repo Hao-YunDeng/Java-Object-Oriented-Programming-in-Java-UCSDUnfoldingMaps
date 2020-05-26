@@ -1,5 +1,6 @@
 package module5;
 
+
 import de.fhpotsdam.unfolding.providers.Microsoft;
 
 import java.util.ArrayList;
@@ -180,17 +181,36 @@ public class EarthquakeCityMap extends PApplet {
 		if (lastClicked != null) {
 			lastClicked.setClicked(false);
 			lastClicked = null;
-			for(Marker citymarker : cityMarkers) {
-				((CommonMarker)citymarker).setClicked(false);
-			}
-			for(Marker quakemarker : quakeMarkers) {
-				((CommonMarker)quakemarker).setClicked(false);
-			}
+//			for(Marker citymarker : cityMarkers) {
+//				((CommonMarker)citymarker).setClicked(false);
+//			}
+//			for(Marker quakemarker : quakeMarkers) {
+//				((CommonMarker)quakemarker).setClicked(false);
+//			}
+			//Haoyun5/25/2020: In the presence of "return"'s below, this four lines are not necessary. 
+			//Meant to protect the method if there is 
+			//a "double-selected" (two marks, one city and one quake, selected 
+			//and lastClicked has moved to the 2nd one so the first one stays selected 
+			//and cannot be cleared).
+			//But wait: setClicked or setSelected??
+			
 		}
 		else{
 			selectIfAffected();
 		}
 	}
+	//Haoyun5/25/2020: for testing	
+//	public static void wait(int ms){
+//        try
+//        {
+//            Thread.sleep(ms);
+//        }
+//        catch(InterruptedException ex)
+//        {
+//            Thread.currentThread().interrupt();
+//        }
+//    }
+	
 	
 	public void selectIfAffected() {
 		for(Marker citymarker : cityMarkers) {			
@@ -207,9 +227,12 @@ public class EarthquakeCityMap extends PApplet {
 						quakemarker.setHidden(true);																		
 					}
 				}
-				break;
+				return;
 			}
 		}
+		
+		//Haoyun5/25/2020: for testing
+//		wait(2000);
 		
 		for(Marker quakemarker : quakeMarkers) {			
 			if(quakemarker.isSelected()) {
@@ -225,7 +248,8 @@ public class EarthquakeCityMap extends PApplet {
 						citymarker.setHidden(true);																		
 					}
 				}
-				break;
+				return;
+				
 			}
 		}
 		

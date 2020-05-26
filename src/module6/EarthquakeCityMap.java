@@ -1,7 +1,10 @@
 package module6;
 
+import de.fhpotsdam.unfolding.providers.Microsoft;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import de.fhpotsdam.unfolding.UnfoldingMap;
@@ -73,7 +76,8 @@ public class EarthquakeCityMap extends PApplet {
 		    earthquakesURL = "2.5_week.atom";  // The same feed, but saved August 7, 2015
 		}
 		else {
-			map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			//map = new UnfoldingMap(this, 200, 50, 650, 600, new Google.GoogleMapProvider());
+			map = new UnfoldingMap(this, 200, 50, 650, 600, new Microsoft.HybridProvider());
 			// IF YOU WANT TO TEST WITH A LOCAL FILE, uncomment the next line
 		    //earthquakesURL = "2.5_week.atom";
 		}
@@ -124,6 +128,7 @@ public class EarthquakeCityMap extends PApplet {
 	    map.addMarkers(quakeMarkers);
 	    map.addMarkers(cityMarkers);
 	    
+	    sortAndPrint(15);
 	    
 	}  // End setup
 	
@@ -137,7 +142,34 @@ public class EarthquakeCityMap extends PApplet {
 	
 	
 	// TODO: Add the method:
-	//   private void sortAndPrint(int numToPrint)
+	private void sortAndPrint(int numToPrint) {
+				
+		//Haoyun: note, don't write new List<>(); list is interface and cannot be instantiated.
+		
+		List<EarthquakeMarker> quakeMarkerList = new ArrayList<EarthquakeMarker>();
+		for (Marker marker : quakeMarkers) {
+			quakeMarkerList.add((EarthquakeMarker) marker);
+		}
+		Collections.sort(quakeMarkerList);			
+		System.out.println("Total num of earthquakes: "+ quakeMarkerList.size());
+		for(int i = 0; i< Math.min(numToPrint, quakeMarkerList.size()); i++) {
+			System.out.println(quakeMarkerList.get(i));
+		}
+		
+		//Haoyun: two alternative ways to sort, the first is
+		//to cast the list quakeMarkers to array and use Array.sort().
+		//Object[] quakeMarkersArray = quakeMarkers.toArray();	
+		//The second is as follows
+//		   if(quakeMarkers.get(0) instanceof EarthquakeMarker){
+//			   List<?> arr= quakeMarkers;
+//			   List<EarthquakeMarker> quakeArr = (List<EarthquakeMarker>) arr;
+//			   Collections.sort(quakeArr);
+//			   for(int i=0; i<numToPrint; i++){
+//				   System.out.println(quakeArr.get(i));
+//			   }
+//		   }
+		
+	}
 	// and then call that method from setUp
 	
 	/** Event handler that gets called automatically when the 
@@ -183,11 +215,12 @@ public class EarthquakeCityMap extends PApplet {
 	 */
 	@Override
 	public void mouseClicked()
-	{
+	{				
 		if (lastClicked != null) {
 			unhideMarkers();
 			lastClicked = null;
-		}
+		}	
+					
 		else if (lastClicked == null) 
 		{
 			checkEarthquakesForClick();
@@ -205,7 +238,8 @@ public class EarthquakeCityMap extends PApplet {
 		// Loop over the earthquake markers to see if one of them is selected
 		for (Marker marker : cityMarkers) {
 			if (!marker.isHidden() && marker.isInside(map, mouseX, mouseY)) {
-				lastClicked = (CommonMarker)marker;
+				lastClicked = (CommonMarker)marker;			
+				
 				// Hide all the other earthquakes and hide
 				for (Marker mhide : cityMarkers) {
 					if (mhide != lastClicked) {
